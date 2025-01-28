@@ -1,0 +1,65 @@
+{
+  "mappings": {
+    "properties": {
+      "provincia": {
+        "properties": {
+          "nombre": { "type": "keyword" }
+        }
+      },
+      "municipio": {
+        "properties": {
+          "id_municipio": { "type": "integer" },
+          "nombre_municipio": { "type": "text" },
+          "provincia": { "type": "keyword" }
+        }
+      },
+      "localidad": {
+        "properties": {
+          "id_localidad": { "type": "integer" },
+          "nombre_localidad": { "type": "text" },
+          "id_municipio": { "type": "integer" }
+        }
+      },
+      "direccion": {
+        "properties": {
+          "direccion": { "type": "text" },
+          "codigo_postal": { "type": "integer" },
+          "id_localidad": { "type": "integer" }
+        }
+      },
+      "empresa": {
+        "properties": {
+          "nombre": { "type": "keyword" }
+        }
+      },
+      "combustible": {
+        "properties": {
+          "tipo_combustible": { "type": "text" }
+        }
+      },
+      "venta": {
+        "properties": {
+          "latitud": { "type": "double" },
+          "longitud": { "type": "double" },
+          "tipo_combustible": { "type": "text" },
+          "precio": { "type": "double" },
+          "rem": { "type": "keyword" }
+        }
+      },
+      "estacion_servicio": {
+        "properties": {
+          "latitud": { "type": "double" },
+          "longitud": { "type": "double" },
+          "empresa": { "type": "keyword" },
+          "direccion": { "type": "text" },
+          "codigo_postal": { "type": "integer" },
+          "horario": { "type": "text" },
+          "margen": { "type": "keyword" },
+          "fecha_actualizacion": { "type": "date", "format": "yyyy-MM-dd" },
+          "tipo_venta": { "type": "keyword" },
+          "tipo_estacion": { "type": "keyword" }
+        }
+      }
+    }
+  }
+}
