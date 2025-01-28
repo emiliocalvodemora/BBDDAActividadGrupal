@@ -1,0 +1,381 @@
+
+1. Estructura de los Datos Relacionales de Origen:
+
+Las tablas y sus campos son:
+
+provincia:
+
+provincia_nombre (VARCHAR(100), PRIMARY KEY)
+
+municipio:
+
+id_municipio (INT, PRIMARY KEY)
+
+nombre_municipio (VARCHAR(200))
+
+provincia (VARCHAR(100), FOREIGN KEY referencing provincia.provincia_nombre)
+
+localidad:
+
+id_localidad (INT, PRIMARY KEY)
+
+nombre_localidad (VARCHAR(200))
+
+id_municipio (INT, FOREIGN KEY referencing municipio.id_municipio)
+
+empresa:
+
+nombre (VARCHAR(100), PRIMARY KEY)
+
+direccion:
+
+id_direccion (INT, PRIMARY KEY)
+
+id_localidad (INT, FOREIGN KEY referencing localidad.id_localidad)
+
+direccion (VARCHAR(200))
+
+codigo_postal (INT)
+
+estacion_servicio:
+
+id_estacion (INT, PRIMARY KEY)
+
+empresa (VARCHAR(100), FOREIGN KEY referencing empresa.nombre)
+
+direccion (VARCHAR(200), FOREIGN KEY referencing direccion.direccion)
+
+codigo_postal (INT)
+
+horario (VARCHAR(100))
+
+margen (CHAR(1))
+
+fecha_actualizacion (VARCHAR(100))
+
+tipo_venta (VARCHAR(100))
+
+tipo_estacion (VARCHAR(100))
+
+latitud (DOUBLE)
+
+longitud (DOUBLE)
+
+combustible:
+
+tipo_combustible (VARCHAR(200), PRIMARY KEY)
+
+venta:
+
+id_venta (INT, PRIMARY KEY)
+
+latitud (DOUBLE)
+
+longitud (DOUBLE)
+
+tipo_combustible (VARCHAR(200), FOREIGN KEY referencing combustible.tipo_combustible)
+
+precio (DOUBLE)
+
+rem (CHAR(5))
+
+2. Estructura de los Datos No Relacionales en MongoDB: 
+
+
+{
+  "_id": <id_estacion>,
+  "provincia": {
+    "provincia_nombre": "String"
+  },
+    "municipio": {
+    "id_municipio": "Int",
+    "nombre_municipio": "String"
+  },
+  "localidad": {
+    "id_localidad": "Int",
+     "nombre_localidad": "String"
+  },
+    "empresa": {
+    "nombre": "String"
+  },
+  "direccion": {
+    "id_direccion":"Int",
+    "direccion":"String",
+     "codigo_postal": "Int"
+  },
+  "estacion_servicio": {
+        "id_estacion": "Int",
+        "horario": "String",
+        "margen": "String",
+	      "fecha_actualizacion": "String",
+        "tipo_venta": "String",
+        "tipo_estacion": "String",
+        "latitud": "Double",
+        "longitud": "Double"
+   },
+  "ventas":[
+      {
+          "id_venta":"Int",
+        "latitud": "Double",
+        "longitud": "Double",
+        "combustible": {
+         "tipo_combustible": "String"
+        },
+        "precio":"Double",
+          "rem":"String"
+
+      }
+     ]
+}
+content_copy
+download
+Use code with caution.
+Json
+
+3. Bibliotecas Necesarias (Ya agregadas al pom.xml):
+
+mysql-connector-java
+
+mongodb-driver-sync
+
+lombok
+
+json
+
+4. Pasos para el Proceso ETL:
+
+Conexión a las Bases de Datos:
+
+Establecer conexión a la base de datos relacional utilizando DriverManager.getConnection.
+
+Establecer conexión a MongoDB utilizando MongoClients.create.
+
+Extracción de Datos (Extract):
+
+Ejecutar una consulta SQL para extraer toda la información necesaria, usando JOINs entre las tablas.
+
+Transformación de Datos (Transform):
+
+Iterar a través de los resultados de la consulta, creando un objeto JSON para cada estación.
+
+Crear los documentos flattened añadiendo la información relacional directamente al objeto JSON de cada estación.
+
+Carga de Datos (Load):
+
+Usar collection.bulkWrite para hacer las inserciones a MongoDB de manera masiva.
+
+Insertar los documentos JSON en la colección de MongoDB.
+
+5. Código Java (Completo):
+
+import com.mongodb.client.*;
+import com.mongodb.client.model.InsertOneModel;
+import lombok.extern.slf4j.Slf4j;
+import org.bson.Document;
+import org.json.JSONArray;
+import org.json.JSONObject;
+import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
+
+@Slf4j
+public class EtlMongoDB {
+
+    private static final String JDBC_URL = "jdbc:mysql://your_host:3306/your_database?useSSL=false";
+    private static final String JDBC_USER = "your_user";
+    private static final String JDBC_PASSWORD = "your_password";
+    private static final String MONGODB_URI = "mongodb://your_mongodb_uri";
+    private static final String MONGODB_DATABASE = "your_mongodb_database";
+    private static final String COLLECTION_NAME = "estaciones_flattened";
+
+
+    public static void main(String[] args) {
+
+        // 1. Conexión a las bases de datos
+        try(Connection conn_relacional = DriverManager.getConnection(JDBC_URL, JDBC_USER, JDBC_PASSWORD)){
+           log.info("Conexión a la base de datos relacional exitosa!");
+
+        // MongoDB Connection
+            MongoClient mongoClient = MongoClients.create(MONGODB_URI);
+            MongoDatabase db_mongo = mongoClient.getDatabase(MONGODB_DATABASE);
+            MongoCollection<Document> collection = db_mongo.getCollection(COLLECTION_NAME);
+            log.info("Conexión a MongoDB exitosa!");
+
+
+       // 2. Extracción de Datos (Extract) y Transformación (Transform)
+        String query = """
+            SELECT
+            	p.provincia_nombre,
+                m.id_municipio, m.nombre_municipio,
+                l.id_localidad, l.nombre_localidad,
+                e.nombre as empresa_nombre,
+                d.id_direccion, d.direccion, d.codigo_postal,
+                es.id_estacion, es.horario, es.margen, es.fecha_actualizacion, es.tipo_venta,
+            es.tipo_estacion, es.latitud, es.longitud,
+            v.id_venta, v.latitud AS latitud_venta, v.longitud AS longitud_venta, c.tipo_combustible, v.precio, v.rem
+        FROM estacion_servicio es
+         INNER JOIN empresa e ON es.empresa = e.nombre
+         INNER JOIN direccion d ON es.direccion = d.direccion
+         INNER JOIN localidad l ON d.id_localidad = l.id_localidad
+         INNER JOIN municipio m ON l.id_municipio = m.id_municipio
+         INNER JOIN provincia p ON m.provincia = p.provincia_nombre
+         LEFT JOIN venta v ON es.id_estacion =  v.id_venta
+         LEFT JOIN combustible c ON v.tipo_combustible = c.tipo_combustible
+
+        """;
+
+       try(Statement statement = conn_relacional.createStatement(); ResultSet resultSet = statement.executeQuery(query)) {
+            List<InsertOneModel<Document>> bulkOperations = new ArrayList<>();
+           int id_estacion_anterior = 0;
+           JSONObject documento_mongo = null;
+           JSONArray ventas = null;
+
+           while(resultSet.next()){
+               int id_estacion_actual = resultSet.getInt("id_estacion");
+
+
+           if(id_estacion_actual!= id_estacion_anterior){
+
+           if(documento_mongo!=null){
+                 Document doc= Document.parse(documento_mongo.toString());
+                 bulkOperations.add(new InsertOneModel<>(doc));
+                 log.info("Estación {} procesada", id_estacion_anterior);
+             }
+
+
+                documento_mongo = new JSONObject();
+                JSONObject provincia = new JSONObject();
+                JSONObject municipio = new JSONObject();
+                JSONObject localidad = new JSONObject();
+                JSONObject empresa = new JSONObject();
+                JSONObject direccion = new JSONObject();
+                JSONObject estacion_servicio = new JSONObject();
+                ventas = new JSONArray();
+
+
+                provincia.put("provincia_nombre", resultSet.getString("provincia_nombre"));
+                 municipio.put("id_municipio", resultSet.getInt("id_municipio"));
+                  municipio.put("nombre_municipio", resultSet.getString("nombre_municipio"));
+                 localidad.put("id_localidad", resultSet.getInt("id_localidad"));
+                  localidad.put("nombre_localidad", resultSet.getString("nombre_localidad"));
+                 empresa.put("nombre", resultSet.getString("empresa_nombre"));
+                  direccion.put("id_direccion", resultSet.getInt("id_direccion"));
+                  direccion.put("direccion", resultSet.getString("direccion"));
+                  direccion.put("codigo_postal", resultSet.getInt("codigo_postal"));
+                estacion_servicio.put("id_estacion", resultSet.getInt("id_estacion"));
+                estacion_servicio.put("horario", resultSet.getString("horario"));
+                estacion_servicio.put("margen", resultSet.getString("margen"));
+                estacion_servicio.put("fecha_actualizacion", resultSet.getString("fecha_actualizacion"));
+                estacion_servicio.put("tipo_venta", resultSet.getString("tipo_venta"));
+                estacion_servicio.put("tipo_estacion", resultSet.getString("tipo_estacion"));
+                estacion_servicio.put("latitud", resultSet.getDouble("latitud"));
+                estacion_servicio.put("longitud", resultSet.getDouble("longitud"));
+
+                documento_mongo.put("_id", resultSet.getInt("id_estacion"));
+                documento_mongo.put("provincia", provincia);
+                documento_mongo.put("municipio", municipio);
+                documento_mongo.put("localidad", localidad);
+                documento_mongo.put("empresa", empresa);
+                documento_mongo.put("direccion", direccion);
+                documento_mongo.put("estacion_servicio", estacion_servicio);
+                documento_mongo.put("ventas", ventas);
+
+             id_estacion_anterior=id_estacion_actual;
+           }
+
+            if(resultSet.getString("tipo_combustible") != null){
+              JSONObject venta = new JSONObject();
+              JSONObject combustible = new JSONObject();
+              venta.put("id_venta", resultSet.getInt("id_venta"));
+              venta.put("latitud", resultSet.getDouble("latitud_venta"));
+              venta.put("longitud", resultSet.getDouble("longitud_venta"));
+               combustible.put("tipo_combustible", resultSet.getString("tipo_combustible"));
+              venta.put("combustible", combustible);
+             venta.put("precio", resultSet.getDouble("precio"));
+              venta.put("rem", resultSet.getString("rem"));
+            ventas.put(venta);
+            }
+
+
+           }
+           //Guardar ultima estacion
+          if(documento_mongo!=null){
+              Document doc= Document.parse(documento_mongo.toString());
+              bulkOperations.add(new InsertOneModel<>(doc));
+              log.info("Estación {} procesada", id_estacion_anterior);
+           }
+
+            if(!bulkOperations.isEmpty()){
+              collection.bulkWrite(bulkOperations);
+                 log.info("{} estaciones insertadas en MongoDB", bulkOperations.size());
+            } else{
+                  log.info("No hay estaciones a insertar en MongoDB");
+              }
+
+
+        } catch (SQLException e){
+             log.error("Error al consultar la base de datos relacional: " + e);
+        } catch (Exception e){
+                log.error("Error al parsear datos a JSON o insertarlos en MongoDB: " + e);
+        }finally {
+               //Close MongoDB Connection
+                mongoClient.close();
+                log.info("Conexiones cerradas");
+        }
+
+    }
+}
+content_copy
+download
+Use code with caution.
+Java
+
+Explicación del Código:
+
+Importaciones: Importa las clases necesarias de las bibliotecas JDBC y MongoDB.
+
+Credenciales: Se configuran las variables de conexión a las bases de datos.
+
+Conexión a las Bases de Datos:
+
+Se establece la conexión a MySQL usando DriverManager.getConnection().
+
+Se establece la conexión a MongoDB usando MongoClients.create() y se obtiene la base de datos y la colección.
+
+Extracción y Transformación:
+
+Se crea un objeto Statement y se ejecuta una consulta SQL para obtener los datos.
+
+Se itera sobre el resultado (ResultSet) de la consulta SQL.
+
+Se comprueba si la id_estacion es distinta a la anterior. En caso de serlo, es una nueva estación, y se crea un nuevo documento JSON.
+
+Se crea el documento JSON flattened, añadiendo directamente toda la información relacional, incluyendo todas las ventas asociadas a la estación
+
+Se parsea el objeto JSON a objeto Bson Document para poder insertar en MongoDB.
+
+Carga de Datos:
+
+Se utiliza el método bulkWrite de la collection para hacer la inserción a MongoDB de manera masiva.
+
+Cierre de las Conexiones: Se cierran todas las conexiones.
+
+Puntos Importantes:
+
+Credenciales: Reemplaza los placeholders (ej: your_host, your_user, your_password, your_database, your_mongodb_uri, etc.) con tus credenciales correctas.
+
+Manejo de Errores: El código incluye manejo de errores básico, pero debes mejorarlo para un proceso de producción.
+
+Performance: Considera añadir indices a las queries relacionales para mejorar la velocidad, y procesar los datos por lotes (batches) para un mejor rendimiento.
+
+JSON: Se utiliza una libreria JSON para crear los objetos JSON de forma más sencilla.
+
+Lombok: Se usa la libreria Lombok para la creación de logs de manera mas sencilla.
+
+Adaptabilidad: Este código es una base, debes adaptarlo según las necesidades exactas de tus datos.
+
+Librerías: Para compilar y ejecutar, asegúrate de tener las librerías mysql-connector-java y mongodb-driver-sync en el classpath de tu proyecto.
+
+Para ejecutar este código, deberás tener un proyecto Java configurado en tu IDE. Deberás agregar los jars de las librerías mencionadas como dependencias.
+
+Con esta guía y el código, puedes realizar el proceso ETL de una base de datos relacional a MongoDB con Java, creando los documentos "flattened" que hemos definido. ¡Cualquier duda, no dudes en preguntar!
