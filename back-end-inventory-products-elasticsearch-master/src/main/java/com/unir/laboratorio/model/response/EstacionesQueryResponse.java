@@ -1,21 +1,20 @@
-package com.unir.products.model.response;
+package com.unir.laboratorio.model.response;
 
-import com.unir.products.model.db.Product;
+import com.unir.laboratorio.model.db.Estacion;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.util.List;
-import java.util.Map;
 
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
 @Setter
-public class ProductsQueryResponse {
+public class EstacionesQueryResponse {
 
-    private List<Product> products;
+    private List<Estacion> products;
     private List<AggregationDetails> aggs;
 
 }

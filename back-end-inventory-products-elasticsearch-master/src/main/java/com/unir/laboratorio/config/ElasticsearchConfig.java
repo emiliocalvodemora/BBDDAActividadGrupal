@@ -1,4 +1,4 @@
-package com.unir.products.config;
+package com.unir.laboratorio.config;
 
 import org.apache.http.HttpHost;
 import org.apache.http.auth.AuthScope;
@@ -17,14 +17,17 @@ import org.springframework.data.elasticsearch.core.ElasticsearchRestTemplate;
 import org.springframework.data.elasticsearch.repository.config.EnableElasticsearchRepositories;
 
 @Configuration
-@EnableElasticsearchRepositories(basePackages = "com.unir.products.data")
+@EnableElasticsearchRepositories(basePackages = "com.unir.laboratorio.data")
 public class ElasticsearchConfig {
 
-  @Value("${elasticsearch.host}")
+//  @Value("${elasticsearch.host}")
+    @Value("actividad3grupalbbdd-8460112494.us-east-1.bonsaisearch.net")
   private String clusterEndpoint;
-  @Value("${elasticsearch.credentials.user}")
+//  @Value("${elasticsearch.credentials.user}")
+    @Value("t9t79cimab")
   private String username;
-  @Value("${elasticsearch.credentials.password}")
+//  @Value("${elasticsearch.credentials.password}")
+    @Value("w9nq7ilipm")
   private String password;
 
   @Bean

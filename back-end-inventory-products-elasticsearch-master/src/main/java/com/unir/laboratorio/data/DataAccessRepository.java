@@ -1,11 +1,10 @@
-package com.unir.products.data;
+package com.unir.laboratorio.data;
 
-import java.net.InetAddress;
 import java.util.*;
 
-import com.unir.products.model.db.Product;
-import com.unir.products.model.response.AggregationDetails;
-import com.unir.products.model.response.ProductsQueryResponse;
+import com.unir.laboratorio.model.db.Estacion;
+import com.unir.laboratorio.model.response.AggregationDetails;
+import com.unir.laboratorio.model.response.EstacionesQueryResponse;
 import lombok.SneakyThrows;
 import org.apache.commons.lang.StringUtils;
 import org.elasticsearch.index.query.BoolQueryBuilder;
@@ -34,26 +33,26 @@ public class DataAccessRepository {
 
     // Esta clase (y bean) es la unica que usan directamente los servicios para
     // acceder a los datos.
-    private final ProductRepository productRepository;
+    private final EstacionRepository estacionRepository;
     private final ElasticsearchOperations elasticClient;
 
     private final String[] descriptionSearchFields = {"description", "description._2gram", "description._3gram"};
 
-    public Product save(Product product) {
-        return productRepository.save(product);
+    public Estacion save(Estacion estacion) {
+        return estacionRepository.save(estacion);
     }
 
-    public Boolean delete(Product product) {
-        productRepository.delete(product);
+    public Boolean delete(Estacion estacion) {
+        estacionRepository.delete(estacion);
         return Boolean.TRUE;
     }
 
-	public Optional<Product> findById(String id) {
-		return productRepository.findById(id);
+	public Optional<Estacion> findById(String id) {
+		return estacionRepository.findById(id);
 	}
 
     @SneakyThrows
-    public ProductsQueryResponse findProducts(String name, String description, String country, Boolean aggregate) {
+    public EstacionesQueryResponse findEstaciones(String name, String description, String country, Boolean aggregate) {
 
         BoolQueryBuilder querySpec = QueryBuilders.boolQuery();
 
@@ -76,7 +75,6 @@ public class DataAccessRepository {
 
         //Filtro implicito
         //No le pido al usuario que lo introduzca pero lo aplicamos proactivamente en todas las peticiones
-        //En este caso, que los productos sean visibles (estado correcto de la entidad)
         querySpec.must(QueryBuilders.termQuery("visible", true));
 
         NativeSearchQueryBuilder nativeSearchQueryBuilder = new NativeSearchQueryBuilder().withQuery(querySpec);
@@ -90,7 +88,7 @@ public class DataAccessRepository {
         //nativeSearchQueryBuilder.withPageable(PageRequest.of(0, 10));
 
         Query query = nativeSearchQueryBuilder.build();
-        SearchHits<Product> result = elasticClient.search(query, Product.class);
+        SearchHits<Estacion> result = elasticClient.search(query, Estacion.class);
 
         List<AggregationDetails> responseAggs = new LinkedList<>();
 
@@ -106,9 +104,9 @@ public class DataAccessRepository {
                                     new AggregationDetails(
                                             bucket.getKey().toString(),
                                             (int) bucket.getDocCount(),
-                                            serverFullAddress + "/products?country=" + bucket.getKey() + queryParams)));
+                                            serverFullAddress + "/laboratorio?country=" + bucket.getKey() + queryParams)));
         }
-        return new ProductsQueryResponse(result.getSearchHits().stream().map(SearchHit::getContent).toList(), responseAggs);
+        return new EstacionesQueryResponse(result.getSearchHits().stream().map(SearchHit::getContent).toList(), responseAggs);
     }
 
     /**

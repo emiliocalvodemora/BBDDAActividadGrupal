@@ -1,13 +1,13 @@
-package com.unir.products;
+package com.unir.laboratorio;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class ElasticProductsApplication {
+public class ElasticEstacionesApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(ElasticProductsApplication.class, args);
+		SpringApplication.run(ElasticEstacionesApplication.class, args);
 	}
 
 }

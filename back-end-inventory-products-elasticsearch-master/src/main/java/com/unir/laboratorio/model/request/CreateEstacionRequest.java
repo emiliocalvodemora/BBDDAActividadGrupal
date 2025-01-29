@@ -1,4 +1,4 @@
-package com.unir.products.model.request;
+package com.unir.laboratorio.model.request;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -9,7 +9,7 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class CreateProductRequest {
+public class CreateEstacionRequest {
 
 	private String name;
 	private String country;
