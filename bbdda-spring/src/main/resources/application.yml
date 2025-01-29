@@ -1,0 +1,37 @@
+## Configuracion de Spring
+spring:
+  application:
+    name: bbdda-spring-data
+
+    ## Permitir redefinición de beans
+    main:
+      allow-bean-definition-overriding: true
+
+  ## Configuracion de MySQL
+  datasource:
+    url: ${DB_URL:jdbc:mysql://localhost:3306/laboratorio}
+    driver-class-name: ${DB_DRIVER:com.mysql.cj.jdbc.Driver}
+    username: ${DB_USER:root}
+    password: ${DB_PASSWORD:mysql}
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: validate
+
+  ## Configuracion de ElasticSearch
+  elasticsearch:
+      host: ${ELASTICSEARCH_HOST:bbddagrupal-7266285954.eu-west-1.bonsaisearch.net}
+      username: ${ELASTICSEARCH_USER:y9wqcttpem}
+      password: ${ELASTICSEARCH_PWD:mg6s4w75tb}
+
+  ## Configuracion del servidor
+  server:
+    port: 8088  # Puerto del servidor
+    servlet:
+      context-path: /api  # Base URL para endpoints REST
+
+## Configuracion de Logging
+logging:
+  level:
+    org.springframework: INFO  # Ajustar nivel de logs
+    org.elasticsearch.client: DEBUG  # Depuración para ver conexión con ElasticSearch
