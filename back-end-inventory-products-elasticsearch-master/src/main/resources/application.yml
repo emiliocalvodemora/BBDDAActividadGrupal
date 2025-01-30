@@ -1,28 +1,40 @@
 ## Configuracion de Spring
 spring:
   application:
-    name: ms-inventory-products-elasticsearch
+    name: gasolineras
+
+    ## Permitir redefinición de beans
+    main:
+      allow-bean-definition-overriding: true
+
+  ## Configuracion de MySQL
+  datasource:
+    url: ${DB_URL:jdbc:mysql://localhost:3306/laboratorio}
+    driver-class-name: ${DB_DRIVER:com.mysql.cj.jdbc.Driver}
+    username: ${DB_USER:root}
+    password: ${DB_PASSWORD:mysql}
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: validate
+
 
 ## Configuracion de Instancia 
 server:
   port: 8088
   fullAddress: ${HOST:http://localhost}:${PORT:${server.port}}
+  servlet:
+    context-path: /api  # Base URL para endpoints REST
 
-## Configuracion del cliente de Eureka
-eureka:
-  client:
-    service-url:
-      defaultZone: ${EUREKA_URL:http://localhost:8761/eureka}
-  instance:
-    preferIpAddress: true
-    hostname: ms-inventory-products
 
 ##Elasticsearch config
 elasticsearch:
-  host: ${ELASTICSEARCH_HOST}
-  credentials:
-    user: ${ELASTICSEARCH_USER}
-    password: ${ELASTICSEARCH_PWD}
+    host: ${ELASTICSEARCH_HOST:bbddagrupal-7266285954.eu-west-1.bonsaisearch.net}
+    credentials:
+      user: ${ELASTICSEARCH_USER:y9wqcttpem}
+      password: ${ELASTICSEARCH_PWD:mg6s4w75tb}
 logging:
   level:
     tracer: TRACE
+    org.springframework: INFO  # Ajustar nivel de logs
+    org.elasticsearch.client: DEBUG  # Depuración para ver conexión con ElasticSearch

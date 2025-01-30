@@ -4,6 +4,7 @@ import com.unir.laboratorio.model.db.Estacion;
 import com.unir.laboratorio.model.request.CreateEstacionRequest;
 import com.unir.laboratorio.model.response.EstacionesQueryResponse;
 import com.unir.laboratorio.service.EstacionesService;
+import com.unir.laboratorio.service.EstacionesServiceImpl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -18,6 +19,7 @@ import java.util.Map;
 public class EstacionesController {
 
 	private final EstacionesService service;
+	private final EstacionesServiceImpl estacionesServiceImpl;
 
 	@GetMapping("/estaciones")
 	public ResponseEntity<EstacionesQueryResponse> getEstaciones(
@@ -71,5 +73,10 @@ public class EstacionesController {
 		}
 
 	}
+//	@GetMapping("/run")
+//	public ResponseEntity<String> ejecutarETL() {
+//		estacionesServiceImpl.ejecutarETL();
+//		return ResponseEntity.ok("ETL ejecutada correctamente para la tabla 'estacion_servicio'.");
+//	}
 
 }
