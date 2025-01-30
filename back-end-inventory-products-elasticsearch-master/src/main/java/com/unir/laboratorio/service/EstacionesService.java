@@ -1,18 +1,18 @@
 package com.unir.laboratorio.service;
 
-import com.unir.laboratorio.model.db.Estacion;
+import com.unir.laboratorio.model.db.EstacionServicio;
 import com.unir.laboratorio.model.request.CreateEstacionRequest;
-import com.unir.laboratorio.model.response.EstacionesQueryResponse;
+import com.unir.laboratorio.model.response.EstacionesServicioQueryResponse;
 
 
 public interface EstacionesService {
 
-	EstacionesQueryResponse getEstaciones(String name, String description, String country, Boolean aggregate);
+	EstacionesServicioQueryResponse getEstacionesServicio(double latitud, double longitud, String empresa, String direccion, int codigoPostal, String horario, String margen, String tipoEstacion, String tipoVenta, String fechaActualizacion);
 
-	Estacion getEstacion(String estacionId);
+	EstacionServicio getEstacionServicio(String estacionId);
 	
-	Boolean removeEstacion(String estacionId);
+	Boolean removeEstacionServicio(String estacionId);
 
-	Estacion createEstacion(CreateEstacionRequest request);
+	EstacionServicio createEstacionServicio(CreateEstacionRequest request);
 
 }

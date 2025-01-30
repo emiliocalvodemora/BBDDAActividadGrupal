@@ -20,7 +20,7 @@ public class Estacion {
 		otherFields = @InnerField(suffix = "search", type = FieldType.Search_As_You_Type))
 	private String name;
 	
-	@Field(type = FieldType.Keyword, name = "country")
+	@Field(type = FieldType.Text, name = "country")
 	private String country;
 	
 	@Field(type = FieldType.Search_As_You_Type, name = "description")

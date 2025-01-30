@@ -7,5 +7,6 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface DireccionElasticsearchRepository extends ElasticsearchRepository<DireccionElasticsearch, String> {
 
+    DireccionElasticsearch save(DireccionElasticsearch direccion);
 }
 

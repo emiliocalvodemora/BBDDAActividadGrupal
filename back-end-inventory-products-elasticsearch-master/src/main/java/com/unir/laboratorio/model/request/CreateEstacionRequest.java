@@ -11,8 +11,14 @@ import lombok.Setter;
 @NoArgsConstructor
 public class CreateEstacionRequest {
 
-	private String name;
-	private String country;
-	private String description;
-	private Boolean visible;
+	private String empresa;
+	private String direccion;
+	private String horario;
+	private String fecha_actualizacion;
+	private String tipo_venta;
+	private String tipo_estacion;
+	private String margen;
+	private int codigo_postal;
+	private double latitud;
+	private double longitud;
 }

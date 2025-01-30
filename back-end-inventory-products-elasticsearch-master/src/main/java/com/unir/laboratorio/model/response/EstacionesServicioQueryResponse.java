@@ -1,6 +1,6 @@
 package com.unir.laboratorio.model.response;
 
-import com.unir.laboratorio.model.db.Estacion;
+import com.unir.laboratorio.model.db.EstacionServicio;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -12,9 +12,9 @@ import java.util.List;
 @NoArgsConstructor
 @Getter
 @Setter
-public class EstacionesQueryResponse {
+public class EstacionesServicioQueryResponse {
 
-    private List<Estacion> products;
+    private List<EstacionServicio> EstacionesServicio;
     private List<AggregationDetails> aggs;
 
 }

@@ -3,8 +3,9 @@ package com.unir.laboratorio.data;
 import java.util.*;
 
 import com.unir.laboratorio.model.db.Estacion;
+import com.unir.laboratorio.model.db.EstacionServicio;
 import com.unir.laboratorio.model.response.AggregationDetails;
-import com.unir.laboratorio.model.response.EstacionesQueryResponse;
+import com.unir.laboratorio.model.response.EstacionesServicioQueryResponse;
 import lombok.SneakyThrows;
 import org.apache.commons.lang.StringUtils;
 import org.elasticsearch.index.query.BoolQueryBuilder;
@@ -52,7 +53,7 @@ public class DataAccessRepository {
 	}
 
     @SneakyThrows
-    public EstacionesQueryResponse findEstaciones(String name, String description, String country, Boolean aggregate) {
+    public EstacionesServicioQueryResponse findEstaciones(String name, String description, String country, Boolean aggregate) {
 
         BoolQueryBuilder querySpec = QueryBuilders.boolQuery();
 
@@ -88,7 +89,7 @@ public class DataAccessRepository {
         //nativeSearchQueryBuilder.withPageable(PageRequest.of(0, 10));
 
         Query query = nativeSearchQueryBuilder.build();
-        SearchHits<Estacion> result = elasticClient.search(query, Estacion.class);
+        SearchHits<EstacionServicio> result = elasticClient.search(query, EstacionServicio.class);
 
         List<AggregationDetails> responseAggs = new LinkedList<>();
 
@@ -106,7 +107,7 @@ public class DataAccessRepository {
                                             (int) bucket.getDocCount(),
                                             serverFullAddress + "/laboratorio?country=" + bucket.getKey() + queryParams)));
         }
-        return new EstacionesQueryResponse(result.getSearchHits().stream().map(SearchHit::getContent).toList(), responseAggs);
+        return new EstacionesServicioQueryResponse(result.getSearchHits().stream().map(SearchHit::getContent).toList(), responseAggs);
     }
 
     /**

@@ -6,5 +6,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface LocalidadElasticsearchRepository extends ElasticsearchRepository<LocalidadElasticsearch, Integer> {
-
+    LocalidadElasticsearch save(LocalidadElasticsearch localidad);
 }
